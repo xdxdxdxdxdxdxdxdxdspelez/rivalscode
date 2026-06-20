@@ -1,0 +1,20 @@
+-- ffa auto respawn
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+local respawnRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Duels"):WaitForChild("RespawnNow")
+
+local function setupRespawn(character)
+    local humanoid = character:WaitForChild("Humanoid")
+    humanoid.Died:Connect(function()
+        task.wait()
+        pcall(function()
+            respawnRemote:FireServer()
+        end)
+    end)
+end
+
+LocalPlayer.CharacterAdded:Connect(setupRespawn)
+if LocalPlayer.Character then
+    setupRespawn(LocalPlayer.Character)
+end
