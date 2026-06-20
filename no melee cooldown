@@ -1,0 +1,26 @@
+-- melee rapid fire
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local modules = ReplicatedStorage:FindFirstChild("Modules")
+local itemLib = modules and modules:FindFirstChild("ItemLibrary")
+
+if itemLib then
+    local success, library = pcall(require, itemLib)
+    if success and type(library) == "table" then
+        local items = library.Items or library.Weapons or library.Melee or library.Utilities
+        
+        if type(items) == "table" then
+            local cooldowns = {"Cooldown", "AttackCooldown", "UseDelay", "SpinCooldown", "HeavyAttackCooldown", "AbilityCooldown", "FireCooldown"}
+            
+            for _, item in pairs(items) do
+                if type(item) == "table" and (item.Type == "Melee" or item.Category == "Melee" or (item.Damage and not item.AmmoType)) then
+                    for _, field in ipairs(cooldowns) do
+                        if item[field] then 
+                            item[field] = 0 
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
