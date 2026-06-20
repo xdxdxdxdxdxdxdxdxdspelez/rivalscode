@@ -1,0 +1,25 @@
+-- insta ads
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+task.spawn(function()
+    local ok, Gun = pcall(function() return require(player.PlayerScripts.Modules.ItemTypes.Gun) end)
+    if not ok or not Gun then return end
+    
+    if Gun.StartAiming then
+        local old = Gun.StartAiming
+        Gun.StartAiming = function(self, p)
+            self:SetReplicate("IsAiming", true)
+            self.StopSprinting:Fire()
+            self.ViewModel:SetAiming(true)
+            self:SetReplicate("FOVOffset", self.Info.AimFOVOffset)
+            if self.ViewModel.CurrentAimValue then self.ViewModel.CurrentAimValue = 1 end
+            return true, "StartAiming"
+        end
+    end
+    
+    if Gun.GetAimSpeed then
+        local old = Gun.GetAimSpeed
+        Gun.GetAimSpeed = function(self) return 999 end
+    end
+end)
