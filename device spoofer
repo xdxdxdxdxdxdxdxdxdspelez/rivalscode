@@ -1,4 +1,4 @@
--- device spoofer, you can change to VR, MouseKeyboard, Touch And Gamepad so if ur skidding ai create a dropdown or sum to make all these devices
+-- device spoofer, you can change to VR, MouseKeyboard, Touch And Gamepad so if ur vibecoding create a dropdown or sum to make all these devices
 local device = "VR"
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
