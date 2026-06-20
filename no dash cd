@@ -1,0 +1,27 @@
+-- no dash cooldown for scythe
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local modules = ReplicatedStorage:FindFirstChild("Modules")
+local itemLib = modules and modules:FindFirstChild("ItemLibrary")
+
+if itemLib then
+    local success, library = pcall(require, itemLib)
+    if success and type(library) == "table" then
+        local items = library.Items or library.Weapons or library.Melee or library.Utilities
+        
+        if type(items) == "table" then
+            for name, item in pairs(items) do
+                if type(item) == "table" then
+                    local itemName = item.Name or name
+                    if string.lower(itemName) == "scythe" then
+                        if item.DashCooldown then 
+                            item.DashCooldown = 0 
+                        elseif item.AbilityCooldown then
+                            item.AbilityCooldown = 0
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
