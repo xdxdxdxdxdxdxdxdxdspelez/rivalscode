@@ -1,0 +1,20 @@
+-- no equip anim
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+task.spawn(function()
+    local ok, Gun = pcall(function() return require(player.PlayerScripts.Modules.ItemTypes.Gun) end)
+    if not ok or not Gun then return end
+    
+    if Gun.Equip then
+        local old = Gun.Equip
+        Gun.Equip = function(self, ...)
+            local r = {old(self, ...)}
+            if self.ViewModel then 
+                self.ViewModel:StopAnimation("Equip")
+                self.ViewModel:StopAnimation("EquipEmpty")
+            end
+            return table.unpack(r)
+        end
+    end
+end)
