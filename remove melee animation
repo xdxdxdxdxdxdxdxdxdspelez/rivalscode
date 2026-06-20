@@ -1,0 +1,27 @@
+-- no melee animation
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+task.spawn(function()
+    local ok, Melee = pcall(function() return require(player.PlayerScripts.Modules.ItemTypes.Melee) end)
+    if not ok or not Melee then return end
+    if Melee.StartShooting then
+        local oldStartShooting = Melee.StartShooting
+        Melee.StartShooting = function(self, p1, p2)
+            local vm = self.ViewModel; local savedPlay
+            if vm then savedPlay = vm.PlayAnimation; vm.PlayAnimation = function() end end
+            
+            local result = { oldStartShooting(self, p1, p2) }
+            
+            if vm and savedPlay then
+                vm.PlayAnimation = savedPlay
+                pcall(function()
+                    for _, name in ipairs({"Attack", "Attack1", "Attack2", "Swing", "Slash", "Combo1", "Combo2", "Combo3"}) do 
+                        vm:StopAnimation(name) 
+                    end
+                end)
+            end
+            return table.unpack(result)
+        end
+    end
+end)
