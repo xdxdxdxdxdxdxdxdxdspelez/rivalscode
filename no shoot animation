@@ -1,0 +1,37 @@
+-- no shoot anim
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+task.spawn(function()
+    local ok, Gun = pcall(function() return require(player.PlayerScripts.Modules.ItemTypes.Gun) end)
+    if not ok or not Gun then return end
+
+    if Gun.StartShooting then
+        local oldStartShooting = Gun.StartShooting
+        Gun.StartShooting = function(self, p1, p2)
+            local vm = self.ViewModel; local savedPlay
+            if vm then savedPlay = vm.PlayAnimation; vm.PlayAnimation = function() end end
+            local result = { oldStartShooting(self, p1, p2) }
+            if vm and savedPlay then
+                vm.PlayAnimation = savedPlay
+                pcall(function()
+                    for _, name in ipairs({"Shoot","Fire","ShootBurst","Shoot_ADS","ShootHip","ShootEmpty","ShootADS","Burst"}) do vm:StopAnimation(name) end
+                end)
+            end
+            return table.unpack(result)
+        end
+    end
+
+    local function silenceShootAnim(self, fn, ...)
+        if not self.ViewModel then return fn(self, ...) end
+        local vm = self.ViewModel; local oldPlay = vm.PlayAnimation
+        vm.PlayAnimation = function() end
+        local result = { pcall(fn, self, ...) }
+        vm.PlayAnimation = oldPlay
+        pcall(function() for name in ipairs({"Shoot","Fire","ShootBurst","Shoot_ADS","Shoot_Hip","ShootEmpty","ShootADS","Burst"}) do vm:StopAnimation(name) end end)
+        if result[1] then return table.unpack(result, 2) end
+    end
+
+    if Gun.FinishShooting then local old=Gun.FinishShooting; Gun.FinishShooting=function(self,...) return silenceShootAnim(self,old,...) end end
+    if Gun.ShootBurst then local old=Gun.ShootBurst; Gun.ShootBurst=function(self,...) return silenceShootAnim(self,old,...) end end
+end)
