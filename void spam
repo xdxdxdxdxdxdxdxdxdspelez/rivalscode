@@ -1,0 +1,14 @@
+-- voidspam ez
+game:GetService("RunService"):BindToRenderStep("void", Enum.RenderPriority.Last.Value + 200, function()
+    local root = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if root then
+        local t = tick()
+        local base = Vector3.new(117.81, -121.82, 1177.81)
+        if math.sin(t * 50) > 0 then
+            local dist = math.random(1000000, 5000000)
+            root.CFrame = CFrame.new(base + Vector3.new(dist, 50000, 15000))
+        else
+            root.CFrame = CFrame.new(base)
+        end
+    end
+end)
