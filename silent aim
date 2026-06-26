@@ -1,0 +1,83 @@
+-- advanced silent aim, not like the ones u usually find on scriptblox
+local SilentAimEnabled = true
+local SilentAimFOV = 1360
+
+local SilentFOVCircle = Drawing.new("Circle")
+SilentFOVCircle.Filled = false
+SilentFOVCircle.Color = Color3.fromRGB(255, 50, 50)
+SilentFOVCircle.Thickness = 2
+SilentFOVCircle.Transparency = 0.7
+SilentFOVCircle.Radius = SilentAimFOV
+SilentFOVCircle.Visible = true
+
+local function getClosestTarget()
+    local camera = workspace.CurrentCamera
+    local center = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
+    local closest, shortest = nil, SilentAimFOV
+
+    for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+        if player == game:GetService("Players").LocalPlayer or not player.Character then continue end
+        
+        local head = player.Character:FindFirstChild("Head")
+        local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+        
+        if head and humanoid and humanoid.Health > 0 then
+            local pos, onScreen = camera:WorldToViewportPoint(head.Position)
+            if onScreen then
+                local dist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
+                if dist < shortest then
+                    shortest = dist
+                    closest = head
+                end
+            end
+        end
+    end
+    return closest
+end
+
+task.spawn(function()
+    local success, FC = pcall(function()
+        return require(game:GetService("Players").LocalPlayer.PlayerScripts.Controllers:WaitForChild("FighterController", 10))
+    end)
+    
+    if not success or not FC then 
+        warn("FighterController not found")
+        return 
+    end
+
+    local LocalFighter = nil
+    for i = 1, 80 do
+        if FC.LocalFighter then
+            LocalFighter = FC.LocalFighter
+            break
+        end
+        task.wait(0.3)
+    end
+
+    if not LocalFighter then 
+        warn("LocalFighter not found")
+        return 
+    end
+
+    local OldGetMouseLocation = LocalFighter.GetMouseLocation
+    
+    LocalFighter.GetMouseLocation = function(self, ...)
+        if SilentAimEnabled then
+            local caller = debug.info(3, "s")
+            if caller and caller:find("Gun") then
+                local target = getClosestTarget()
+                if target then
+                    local screenPos = workspace.CurrentCamera:WorldToScreenPoint(target.Position)
+                    return Vector2.new(screenPos.X, screenPos.Y)
+                end
+            end
+        end
+        return OldGetMouseLocation(self, ...)
+    end
+end)
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    local vp = workspace.CurrentCamera.ViewportSize
+    SilentFOVCircle.Position = Vector2.new(vp.X/2, vp.Y/2)
+    SilentFOVCircle.Radius = SilentAimFOV
+end)
